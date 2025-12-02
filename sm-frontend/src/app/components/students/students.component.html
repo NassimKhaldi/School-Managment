@@ -1,0 +1,129 @@
+<div class="students-container">
+  <header>
+    <h1>Student Management</h1>
+    <button (click)="logout()" class="btn-logout">Logout</button>
+  </header>
+
+  <div *ngIf="message" class="success-message">{{ message }}</div>
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+
+  <div class="toolbar">
+    <div class="search-filter">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="onSearch()"
+        placeholder="Search by username"
+        class="input-search"
+      />
+      <button (click)="onSearch()" class="btn-search">Search</button>
+
+      <select
+        [(ngModel)]="selectedLevel"
+        (change)="onFilter()"
+        class="select-level"
+      >
+        <option value="">All Levels</option>
+        <option *ngFor="let level of levels" [value]="level">
+          {{ level }}
+        </option>
+      </select>
+    </div>
+
+    <div class="actions">
+      <button (click)="openCreateModal()" class="btn-create">
+        + New Student
+      </button>
+      <button (click)="exportCsv()" class="btn-export">Export CSV</button>
+      <label class="btn-import">
+        Import CSV
+        <input
+          type="file"
+          accept=".csv"
+          (change)="onFileSelected($event)"
+          style="display: none"
+        />
+      </label>
+    </div>
+  </div>
+
+  <table class="students-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Level</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let student of students">
+        <td>{{ student.id }}</td>
+        <td>{{ student.username }}</td>
+        <td>
+          <span class="badge">{{ student.level }}</span>
+        </td>
+        <td>
+          <button (click)="openEditModal(student)" class="btn-edit">
+            Edit
+          </button>
+          <button (click)="deleteStudent(student.id)" class="btn-delete">
+            Delete
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="students.length === 0">
+        <td colspan="4" class="no-data">No students found</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="pagination">
+    <button (click)="previousPage()" [disabled]="page === 0" class="btn-page">
+      Previous
+    </button>
+    <span
+      >Page {{ page + 1 }} of {{ Math.ceil(totalElements / size) || 1 }}</span
+    >
+    <button
+      (click)="nextPage()"
+      [disabled]="(page + 1) * size >= totalElements"
+      class="btn-page"
+    >
+      Next
+    </button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h2>{{ editMode ? "Edit Student" : "Create Student" }}</h2>
+    <div *ngIf="error" class="error-message">{{ error }}</div>
+
+    <div class="form-group">
+      <label>Username</label>
+      <input
+        type="text"
+        [(ngModel)]="currentStudent.username"
+        class="form-control"
+      />
+    </div>
+
+    <div class="form-group">
+      <label>Level</label>
+      <select [(ngModel)]="currentStudent.level" class="form-control">
+        <option *ngFor="let level of levels" [value]="level">
+          {{ level }}
+        </option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button (click)="saveStudent()" class="btn-save">
+        {{ editMode ? "Update" : "Create" }}
+      </button>
+      <button (click)="closeModal()" class="btn-cancel">Cancel</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,4 @@
+package com.school.management.smbackend.Entities;
+
+public class Student {
+}
