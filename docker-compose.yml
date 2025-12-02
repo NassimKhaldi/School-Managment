@@ -31,7 +31,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: admin123
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_SHOW_SQL: "true"
-      JWT_SECRET: mySecretKeyForJWTTokenGenerationAndValidation123456789
+      JWT_SECRET: 5Kj8pL2mN9qR4tV7wX0zA3bC6dE9fH2jK5mP8qS1uV4xY7zA0bD3eF6hJ9kM2nQ5r
       JWT_EXPIRATION: 86400000
     ports:
       - "8081:8080"
