@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   # PostgreSQL Database
   database:
@@ -10,7 +8,7 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin123
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -36,7 +34,7 @@ services:
       JWT_SECRET: mySecretKeyForJWTTokenGenerationAndValidation123456789
       JWT_EXPIRATION: 86400000
     ports:
-      - "8080:8080"
+      - "8081:8080"
     depends_on:
       database:
         condition: service_healthy
