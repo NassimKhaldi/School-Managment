@@ -19,7 +19,9 @@ public class GlobalExceptionHandler {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         
         if (message != null) {
-            if (message.contains("not found") || message.contains("does not exist")) {
+            if (message.contains("Too many login attempts")) {
+                status = HttpStatus.TOO_MANY_REQUESTS;
+            } else if (message.contains("not found") || message.contains("does not exist")) {
                 status = HttpStatus.NOT_FOUND;
             } else if (message.contains("already exists") || message.contains("exists")) {
                 status = HttpStatus.CONFLICT;

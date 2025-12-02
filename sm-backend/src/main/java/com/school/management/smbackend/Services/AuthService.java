@@ -4,6 +4,7 @@ import com.school.management.smbackend.DTOs.AdminLoginRequest;
 import com.school.management.smbackend.DTOs.AdminRegisterRequest;
 import com.school.management.smbackend.Entities.Admin;
 import com.school.management.smbackend.Repositories.AdminRepository;
+import com.school.management.smbackend.Security.LoginAttemptService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,10 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
     private final AdminRepository adminRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final LoginAttemptService loginAttemptService;
 
-    public AuthService(AdminRepository adminRepository, BCryptPasswordEncoder passwordEncoder) {
+    public AuthService(AdminRepository adminRepository, BCryptPasswordEncoder passwordEncoder, LoginAttemptService loginAttemptService) {
         this.adminRepository = adminRepository;
         this.passwordEncoder = passwordEncoder;
+        this.loginAttemptService = loginAttemptService;
     }
 
     @Transactional
@@ -30,11 +33,25 @@ public class AuthService {
     }
 
     public Admin authenticate(AdminLoginRequest req) {
+        // Check if user is blocked due to too many failed attempts
+        if (loginAttemptService.isBlocked(req.getUsername())) {
+            long remainingTime = loginAttemptService.getRemainingLockTime(req.getUsername());
+            throw new IllegalArgumentException("Too many login attempts. Please try again in " + remainingTime + " seconds");
+        }
+
         Admin admin = adminRepository.findByUsername(req.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+                .orElseThrow(() -> {
+                    loginAttemptService.loginFailed(req.getUsername());
+                    return new IllegalArgumentException("Invalid credentials");
+                });
+        
         if (!passwordEncoder.matches(req.getPassword(), admin.getPassword())) {
+            loginAttemptService.loginFailed(req.getUsername());
             throw new IllegalArgumentException("Invalid credentials");
         }
+        
+        // Login successful - reset failed attempts
+        loginAttemptService.loginSucceeded(req.getUsername());
         return admin;
     }
 }

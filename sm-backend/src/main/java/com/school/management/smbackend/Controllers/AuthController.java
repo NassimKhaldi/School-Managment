@@ -30,6 +30,7 @@ public class AuthController {
     @ApiResponse(responseCode = "201", description = "Admin created")
     @ApiResponse(responseCode = "409", description = "Username already exists")
     @ApiResponse(responseCode = "400", description = "Invalid input")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
     public ResponseEntity<String> register(@Valid @RequestBody AdminRegisterRequest req) {
         authService.register(req);
         return ResponseEntity.status(HttpStatus.CREATED).body("Admin registered successfully");
@@ -39,7 +40,9 @@ public class AuthController {
     @Operation(summary = "Login and get JWT token")
     @ApiResponse(responseCode = "200", description = "Login successful")
     @ApiResponse(responseCode = "401", description = "Invalid credentials")
+    @ApiResponse(responseCode = "429", description = "Too many login attempts")
     @ApiResponse(responseCode = "400", description = "Invalid input")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
     public JwtResponse login(@Valid @RequestBody AdminLoginRequest req) {
         authService.authenticate(req);
         String token = jwtUtil.generateToken(req.getUsername());

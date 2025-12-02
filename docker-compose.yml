@@ -1,0 +1,78 @@
+version: "3.8"
+
+services:
+  # PostgreSQL Database
+  database:
+    image: postgres:15-alpine
+    container_name: school-management-db
+    environment:
+      POSTGRES_DB: schooldb
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - school-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d schooldb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot Backend
+  backend:
+    build:
+      context: ./sm-backend
+      dockerfile: Dockerfile
+    container_name: school-management-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/schooldb
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin123
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+      JWT_SECRET: mySecretKeyForJWTTokenGenerationAndValidation123456789
+      JWT_EXPIRATION: 86400000
+    ports:
+      - "8080:8080"
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - school-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8080/actuator/health || exit 1",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Angular Frontend
+  frontend:
+    build:
+      context: ./sm-frontend
+      dockerfile: Dockerfile
+    container_name: school-management-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    networks:
+      - school-network
+
+networks:
+  school-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

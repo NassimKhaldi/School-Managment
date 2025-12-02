@@ -33,6 +33,7 @@ public class StudentController {
     @Operation(summary = "List students with pagination and filters")
     @ApiResponse(responseCode = "200", description = "OK")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
     public Page<StudentDTO> list(
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size,
@@ -47,6 +48,7 @@ public class StudentController {
     @ApiResponse(responseCode = "200", description = "OK")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     @ApiResponse(responseCode = "404", description = "Not Found")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
     public StudentDTO get(@PathVariable Long id) { return studentService.get(id); }
 
     @PostMapping
@@ -55,6 +57,7 @@ public class StudentController {
     @ApiResponse(responseCode = "400", description = "Bad Request")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     @ApiResponse(responseCode = "409", description = "Conflict")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
     public ResponseEntity<StudentDTO> create(@Valid @RequestBody StudentDTO dto) {
         StudentDTO created = studentService.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
@@ -66,6 +69,7 @@ public class StudentController {
     @ApiResponse(responseCode = "400", description = "Bad Request")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     @ApiResponse(responseCode = "404", description = "Not Found")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
     public StudentDTO update(@PathVariable Long id, @Valid @RequestBody StudentDTO dto) {
         return studentService.update(id, dto);
     }
@@ -75,12 +79,14 @@ public class StudentController {
     @ApiResponse(responseCode = "200", description = "OK")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     @ApiResponse(responseCode = "404", description = "Not Found")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
     public void delete(@PathVariable Long id) { studentService.delete(id); }
 
     @GetMapping("/search")
     @Operation(summary = "Search students by username")
     @ApiResponse(responseCode = "200", description = "OK")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
     public List<StudentDTO> search(@RequestParam String username) {
         return studentService.search(username);
     }
